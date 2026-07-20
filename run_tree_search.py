@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 0.8 seconds
-Output:
 """Headless entry point used by the Pier adapter inside a DeepSWE container."""
 
 import argparse

@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 0.8 seconds
-Output:
 # Running this mini-swe-agent fork on DeepSWE
 
 DeepSWE uses Harbor tasks and program-based verifiers, not Hugging Face
@@ -114,4 +111,3 @@ Pier writes per-trial agent and verifier artifacts, including `reward.json`,
 - DeepSWE requires committed work. The adapter commits the agent's changes
   after it exits; `pre_artifacts.sh` then extracts that patch before grading it
   in a pristine verifier container.
-
