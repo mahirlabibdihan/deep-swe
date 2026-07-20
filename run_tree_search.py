@@ -26,25 +26,25 @@ def main() -> None:
     parser.add_argument("--cwd", default="/app")
     args = parser.parse_args()
 
-    config = yaml.safe_load(get_config_path(Path(args.config)).read_text())
-    environment_config = config.get("environment", {})
-    environment_config.pop("environment_class", None)
-    environment_config["cwd"] = args.cwd
-    environment = LocalEnvironment(**environment_config)
-    reward_config = config.get("reward_model", {})
-    agent = InteractiveAgent(
-        get_model(args.model, config.get("model", {})),
-        environment,
-        RewardModel(
-            get_model(None, reward_config),
-            use_combined_scoring=reward_config.get("use_combined_scoring", True),
-            max_retries=reward_config.get("max_retries", 3),
-        ),
-        **({"mode": "yolo", "confirm_exit": False} | config.get("agent", {})),
-    )
-
+    agent = None
     exit_status = result = extra_info = None
     try:
+        config = yaml.safe_load(get_config_path(Path(args.config)).read_text())
+        environment_config = config.get("environment", {})
+        environment_config.pop("environment_class", None)
+        environment_config["cwd"] = args.cwd
+        environment = LocalEnvironment(**environment_config)
+        reward_config = config.get("reward_model", {})
+        agent = InteractiveAgent(
+            get_model(args.model, config.get("model", {})),
+            environment,
+            RewardModel(
+                get_model(None, reward_config),
+                use_combined_scoring=reward_config.get("use_combined_scoring", True),
+                max_retries=reward_config.get("max_retries", 3),
+            ),
+            **({"mode": "yolo", "confirm_exit": False} | config.get("agent", {})),
+        )
         exit_status, result = agent.run(Path(args.task_file).read_text())
     except Exception as exc:
         exit_status, result = type(exc).__name__, str(exc)
@@ -55,4 +55,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
