@@ -1,8 +1,10 @@
 """Headless entry point used by the Pier adapter inside a DeepSWE container."""
 
 import argparse
+import os
 import traceback
 from pathlib import Path
+from urllib.parse import urlparse
 
 import yaml
 
@@ -12,6 +14,20 @@ from minisweagent.config import get_config_path
 from minisweagent.environments.local import LocalEnvironment
 from minisweagent.models import get_model
 from minisweagent.run.utils.save import save_traj
+
+
+def bypass_proxy_for_api_base(api_base: str | None) -> None:
+    """Connect directly to an explicitly configured internal model server."""
+    if not api_base:
+        return
+    hostname = urlparse(api_base).hostname
+    if not hostname:
+        return
+    for key in ("NO_PROXY", "no_proxy"):
+        entries = [entry for entry in os.environ.get(key, "").split(",") if entry]
+        if hostname not in entries:
+            entries.append(hostname)
+        os.environ[key] = ",".join(entries)
 
 
 def main() -> None:
@@ -32,6 +48,9 @@ def main() -> None:
         environment_config["cwd"] = args.cwd
         environment = LocalEnvironment(**environment_config)
         reward_config = config.get("reward_model", {})
+        bypass_proxy_for_api_base(
+            reward_config.get("model_kwargs", {}).get("api_base")
+        )
         agent = InteractiveAgent(
             get_model(args.model, config.get("model", {})),
             environment,
