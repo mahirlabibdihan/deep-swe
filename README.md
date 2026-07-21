@@ -103,6 +103,38 @@ installed version's concurrency, output-directory, retry, and filtering flags.
 Pier writes per-trial agent and verifier artifacts, including `reward.json`,
 `ctrf.json`, test output, and logs.
 
+## Named resumable jobs
+
+Use the wrapper to give an experiment a stable name:
+
+```bash
+JOB_NAME=gpt5-mini-tree-search N_CONCURRENT=4 bash run.sh
+```
+
+The first invocation creates `jobs/gpt5-mini-tree-search`. Running the same
+command again resumes that job and skips instances that already have completed
+trial results:
+
+```bash
+JOB_NAME=gpt5-mini-tree-search N_CONCURRENT=4 bash run.sh
+```
+
+The saved Pier configuration is authoritative when resuming, so task selection,
+agent, model, and concurrency settings come from the first invocation. To start
+a different configuration, choose a new `JOB_NAME`.
+
+The wrapper defaults to `tree-search-mini-swe-agent` with
+`openrouter/openai/gpt-5-mini`. Override its first-run settings with environment
+variables:
+
+```bash
+JOB_NAME=base-gpt5-mini \
+AGENT=local-mini-swe-agent \
+MODEL=openrouter/openai/gpt-5-mini \
+N_TASKS=10 SAMPLE_SEED=0 N_CONCURRENT=2 \
+bash run.sh
+```
+
 ## Important differences from the SWE-bench experiment
 
 - There is no `--subset verified` or `--split test`.
